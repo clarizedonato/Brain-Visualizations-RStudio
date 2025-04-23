@@ -1,2 +1,1 @@
-# Brain-Visualizations-Rstudio
-Creating brain visualizations in Rstudio using ggseg and ggplot2 packages; code for how to add 2 different gradients (ex. significant and non-significant main effects)to a brain map visualization
+![MDMIS_isovf_FINAL](https://github.com/user-attachments/assets/6840d2b3-e752-4f57-ae9f-b689d957bb8e)
