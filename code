@@ -1,0 +1,39 @@
+# Brain-Visualizations-Rstudio
+#Creating brain visualizations in Rstudio using ggseg and ggplot2 packages; code for how to add 2 different gradients (ex. significant and non-significant main effects)to a brain map visualization
+#originally an Rmarkdown file
+
+## First, import data 
+##When importing data, make sure your column headers are titled as such: "region", "hemi", and a column of the "p-values", "adjusted p-values", or "main effects" that you wish to display
+##make sure your rows for "region" and "hemi" follow that of the dk atlas in ggseg (refer to proper names for regions and hemi here: https://ggseg.github.io/ggseg/ and https://cran.r-project.org/web/packages/ggseg/vignettes/ggseg.html)
+
+## Needed packages
+library(ggplot2)
+library(ggseg)
+
+## using the built in dk brain imaging atlas in the ggseg package, and joining your dataset with the dk atlas so that ggseg will be able to read your own data
+dk %>% 
+  as_tibble() %>% 
+  left_join(mydata) %>% ## your dataframe here
+  arrange(main_effects) ## main effects can be your p-values or adjusted p-values or whatever values you wish to visualize on the brain map 
+
+## Here, I am making two different dataframes based on my original dataframe. This creates two different dataframes, one which keeps only rows/brain regions with significant adjusted p-values below 0.05, while the second dataframe keeps only rows that are equal to or greater than 0.05. 
+significant_mydata <- mydata %>%
+  filter(adjusted_pValues < 0.05)
+
+non_significant_mydata <- mydata %>%
+  filter(adjusted_pValues >= 0.05)
+
+## Creating the brain map
+ggplot() + 
+  geom_brain(data = non_significant_mydata, aes(fill = main_effects), atlas = dk, position = position_brain(hemi ~ side), color = "transparent") + 
+  scale_fill_gradient(low = "#585858", high = "grey90", na.value="white") + ##scale_fill_gradient can be adjusted to whichever colour scheme you want, here I have a grey colour scale for my non-significant brain regions; to use scale_fill_gradient, you must provide 2 different colour codes, one for low and one for high values
+  
+  ggnewscale::new_scale_fill() + ##this line is very important for layering 2 different scale gradients onto the same brain map visualization
+  
+  geom_brain(data = significant_mydata, aes(fill = main_effects), atlas = dk, position = position_brain(hemi ~ side), color = "black", size = 0.8, lineend="round") +  
+  scale_fill_gradient(low = "#2E003E", high = "#d1a6ff", na.value="transparent") + ##my colour scale here is purple for my significant brain regions 
+  
+  theme_void() + 
+  theme(legend.position = "none") ##here, I specify that I don't want my legend to show on my photo; you can change "none" to "left" or "right" or just delete this line if you want to see a legend
+
+ggsave("C:/Users/yourusername/whereyouwanttosaveitonyourcomputer/nameofyourimage.png", width = 10, height = 8, dpi = 300) ##this last line is for saving your image automatically into a folder on your computer
